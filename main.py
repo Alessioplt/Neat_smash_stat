@@ -14,7 +14,7 @@ for i in range(100):
 speciation = genome_manager.new_speciation(1, 1, 0.79, 1.5)
 show_repartition(speciation)
 
-
+print('estetaez')
 #Graph().create_graph(genome_manager.genomes[0], gene_manager)
 
 print("new node")
