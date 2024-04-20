@@ -1,8 +1,7 @@
+import random
+
 from Game.create_all_genes import generate
-from NEAT import Gene_manager
-from NEAT.graph.visualise_genome import Graph
 from NEAT.graph.visualise_sepciation import show_repartition
-from Game import all_functions
 from NEAT import Genome_manager
 
 gene_manager = generate()
@@ -14,13 +13,13 @@ for i in range(100):
 speciation = genome_manager.new_speciation(1, 1, 0.79, 1.5)
 show_repartition(speciation)
 
-print('estetaez')
-#Graph().create_graph(genome_manager.genomes[0], gene_manager)
+for key in speciation:
+    key.score = random.randrange(-5000, 5000)
+    for value in speciation[key]:
+        value.score = random.randrange(-5000, 5000)
+genome_manager.new_generation(gene_manager, 5)
+#TODO fix speciation
+speciation = genome_manager.new_speciation(1, 1, 1, 1)
+show_repartition(speciation)
 
-print("new node")
-for i in range(0):
-    genome_manager.genomes[0].mutate(600, 1)
-    #Graph().create_graph(genome_manager.genomes[0], gene_manager)
-#Graph().create_graph(genome_manager.genomes[0], gene_manager)
-
-genome_manager.save_population('population.meow', 3)
+genome_manager.save_population('population.meow', genome_manager.generation)

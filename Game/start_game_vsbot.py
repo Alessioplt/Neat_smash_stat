@@ -117,7 +117,7 @@ genome_manager.create_genome(gene_manager, 5)
 genome_manager.create_genome(gene_manager, 5)
 genome_manager.create_genome(gene_manager, 5)
 genome_manager.create_genome(gene_manager, 5)
-Graph().create_graph(genome_manager.genomes[0], gene_manager)
+genome_manager.new_speciation(1, 1, 0.79, 1.5)
 
 refreshed = True
 frame=0
@@ -125,11 +125,8 @@ percentP1 = 0
 percentP4 = 0
 stockP1 = 4
 stockP4 = 4
-generation = 0
 
 actualGenome = 0
-bestScore = -999999
-bestGenome = None
 # Main loop
 while True:
     # "step" to the next frame
@@ -152,6 +149,7 @@ while True:
             refreshed = False
             gene_chosen = genome_manager.genomes[actualGenome].calculate(gamestate, controller)
             gene_chosen.behavior(controller)
+            genome_manager.genomes[actualGenome].score += 1
         if gamestate.players[1].percent > percentP1:
             #print(f"percent p1 start: {genome_manager.genomes[actualGenome].score}")
             genome_manager.genomes[actualGenome].score -= gamestate.players[1].percent - percentP1
@@ -182,30 +180,16 @@ while True:
             stockP1 = 4
             stockP4 = 4
             if actualGenome < 4:
-                print(f"Genome {actualGenome} of Generation {generation} has a score of {genome_manager.genomes[actualGenome].score}")
-                if genome_manager.genomes[actualGenome].score > bestScore:
-                    bestGenome = genome_manager.genomes[actualGenome]
+                print(f"Genome {actualGenome} of Generation {genome_manager.generation} has a score of {genome_manager.genomes[actualGenome].score}")
                 actualGenome+=1
             else:
-                print(f"Génération {generation}: "
+                print(f"Génération {genome_manager.generation}: "
                       f"\nGenome 1: {genome_manager.genomes[0].score}"
                       f"\nGenome 2: {genome_manager.genomes[1].score}"
                       f"\nGenome 3: {genome_manager.genomes[2].score}"
                       f"\nGenome 4: {genome_manager.genomes[3].score}"
                       f"\nGenome 5: {genome_manager.genomes[4].score}")
-                generation += 1
-                bestGenome.mutate(10, 1)
-                Graph().create_graph(bestGenome, gene_manager)
-                for value in genome_manager.genomes:
-                    if value != bestGenome:
-                        genome_manager.genomes.remove(value)
-                genome_manager.create_genome(gene_manager, 5)
-                genome_manager.create_genome(gene_manager, 5)
-                genome_manager.create_genome(gene_manager, 5)
-                genome_manager.create_genome(gene_manager, 5)
-                actualGenome = 0
-                bestScore = -999999
-                bestGenome = None
+                genome_manager.new_generation(gene_manager)
         refreshed = True
         melee.MenuHelper.menu_helper_simple(gamestate,
                                             controller,
