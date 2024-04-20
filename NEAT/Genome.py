@@ -16,18 +16,37 @@ class Genome:
             weight = random.uniform(-2, 2)
             self.add_connection(sensor, output, weight)
 
+    def create_from_parents(self, parent1, parent2):
+        already_added = []
+        for connection_parent1 in parent1.connections:
+            for connection_parent2 in parent2.connections:
+                if connection_parent1.name == connection_parent2.name:
+                    already_added.append(connection_parent1.name)
+                    self.add_connection(connection_parent1.node_in, connection_parent1.node_out, parent1.connections[connection_parent1][0], parent1.connections[connection_parent1][1])
+        for connection_parent1 in parent1.connections:
+            if connection_parent1.name not in already_added:
+                self.add_connection(connection_parent1.node_in, connection_parent1.node_out,
+                                    parent1.connections[connection_parent1][0],
+                                    parent1.connections[connection_parent1][1])
+        for connection_parent2 in parent2.connections:
+            if connection_parent2.name not in already_added:
+                self.add_connection(connection_parent2.node_in, connection_parent2.node_out,
+                                    parent2.connections[connection_parent2][0],
+                                    parent2.connections[connection_parent2][1])
+                self.mutate(10, 1)
+
     def find_connection(self, sensor_name, output_name):
         for connection in self.connections.keys():
             if connection.node_in.name == sensor_name and connection.node_out.name == output_name:
                 return connection
 
-    def add_connection(self, sensor, output, weight):
+    def add_connection(self, sensor, output, weight, activated=True):
         connection = self.gene_manager.get_connection(sensor, output)
         if sensor not in self.genes:
             self.genes.append(sensor)
         if output not in self.genes:
             self.genes.append(output)
-        self.connections[connection] = [weight, True]
+        self.connections[connection] = [weight, activated]
 
     def show_connections(self):
         for connection in self.connections.keys():

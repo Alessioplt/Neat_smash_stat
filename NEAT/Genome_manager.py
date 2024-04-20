@@ -79,11 +79,12 @@ def calculate_fitness(genome_1, genome_2, excess_coefficient, disjoint_coefficie
 
 
 class GenomeManager:
-    def __init__(self, genomes=None, speciation=None):
+    def __init__(self, genomes=None, speciation=None, generation=0):
         if speciation is None:
             speciation = {}
         if genomes is None:
             genomes = []
+        self.generation = generation
         self.genomes = genomes
         self.speciation = speciation
 
@@ -105,6 +106,12 @@ class GenomeManager:
     def create_genome(self, gene_manager, connection_number):
         genome = Genome.Genome(gene_manager)
         genome.create(connection_number)
+        self.add_genome(genome)
+        return genome
+
+    def create_genome_from_parents(self, gene_manager, parent1, parent2):
+        genome = Genome.Genome(gene_manager)
+        genome.create_from_parents(parent1, parent2)
         self.add_genome(genome)
         return genome
 
@@ -146,19 +153,47 @@ class GenomeManager:
             value = value[:-1]
             value += '},'
             for genome in self.speciation[speciation]:
-                value +=  f'"score of {speciation_inc}' + '": {'
+                value += f'"score of {speciation_inc}' + '": {'
                 speciation_inc += 1
                 for connection in genome.connections:
-                    value += self.to_text(connection.node_in.name + " -> " + connection.node_out.name) + ': [' + self.to_text(
+                    value += self.to_text(
+                        connection.node_in.name + " -> " + connection.node_out.name) + ': [' + self.to_text(
                         genome.connections[connection][0]) + ',' + self.to_text(
                         genome.connections[connection][1]) + '],'
                 value = value[:-1]
                 value += '},'
             value = value[:-1]
             value += '}\n'
-            #write in file
+            # write in file
             file.write(value)
             print(value)
+
+    def new_generation(self, gene_manager):
+        self.generation += 1
+        print("speciation: ", self.speciation)
+        print("genomes: ", self.genomes)
+        self.clean_genome()
+        for key in self.speciation:
+            best_genome = key
+            best_score = key.score
+            # look for the family member with the best score
+            for value in self.speciation[key]:
+                if value.score > best_score:
+                    best_genome = value
+                    best_score = value.score
+            # now create a new batch of genome using this parent as a base
+            if key == best_genome:
+                self.add_genome(key)
+            else:
+                self.create_genome_from_parents(gene_manager, best_genome, key)
+            for value in self.speciation[key]:
+                if value == best_genome: self.add_genome(value)
+                else:
+                    self.create_genome_from_parents(gene_manager, best_genome, value)
+        self.clean_speciation()
+        self.new_speciation(1, 1, 0.79, 1.5)
+        print("speciation: ", self.speciation)
+        print("genomes: ", self.genomes)
 
     def to_text(self, text):
         return '"' + str(text) + '"'
